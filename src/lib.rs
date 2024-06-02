@@ -1,4 +1,4 @@
-use log::info;
+use log::{error, info};
 use tauri::{plugin::{Builder, TauriPlugin}, Manager, Runtime};
 
 pub struct SteamWorks {
@@ -10,7 +10,10 @@ pub struct SteamWorks {
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
   Builder::new("hal-steamworks")
   .setup(|app| {
-    let (client, single) = steamworks::Client::init_app(394360)?;
+    let (client, single) = steamworks::Client::init_app(394360).map_err(|err| {
+      error!("Steamworks init failed: {}", err);
+      err
+    })?;
 
     app.manage(SteamWorks {
       client: tokio::sync::Mutex::new(client),
