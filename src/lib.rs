@@ -23,7 +23,10 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
     match e {
       tauri::RunEvent::Resumed => {
         info!("Resumed");
-      }
+      },
+      tauri::RunEvent::WindowEvent { label, event, .. } => {
+        info!("WindowEvent: {} {:?}", label, event);
+      },
       _ => {}
     }
   })
