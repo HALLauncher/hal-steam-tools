@@ -1,3 +1,4 @@
+use log::info;
 use tauri::{plugin::{Builder, TauriPlugin}, Manager, Runtime};
 
 pub struct SteamWorks {
@@ -17,6 +18,14 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
     });
 
     Ok(())
+  })
+  .on_event(|app, e| {
+    match e {
+      tauri::RunEvent::Resumed => {
+        info!("Resumed");
+      }
+      _ => {}
+    }
   })
   .build()
 }
