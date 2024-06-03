@@ -9,6 +9,7 @@ exclude = ["/examples"]
 
 [dependencies]
 log = "0.4.21"
+serde = { version = "1.0.203", features = ["derive"] }
 steamworks = { version = "0.11.0", features = ["serde", "raw-bindings"] }
 tauri = { version = "1.4.0" }
 tokio = { version = "1.38.0", features = ["sync"] }
