@@ -7,6 +7,7 @@ use tauri::{
     Event, Manager, Runtime,
 };
 
+/// Represents a wokrshop item.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct WokrshopItem {
     pub id: u64,
@@ -20,6 +21,16 @@ pub struct SteamWorks {
     pub single_client: std::sync::Mutex<steamworks::SingleClient>,
 }
 
+/// Tauri event to request a wokrshop item.
+/// ```ts
+/// import { emit, listen } from "@tauri-apps/api/event";
+/// 
+/// emit("need-wokrshop-item", 1337);
+/// 
+/// listen<any>("got-wokrshop-item", async (event) => {
+///     console.log(event.payload);
+/// });
+/// ```
 fn need_workshop_item<R: Runtime>(handle: tauri::AppHandle<R>, event: Event) {
     let Some(payload) = event.payload() else {
         error!("need-wokrshop-item payload is null {}", event.id());
@@ -74,6 +85,12 @@ fn need_workshop_item<R: Runtime>(handle: tauri::AppHandle<R>, event: Event) {
     }
 }
 
+/// Get a wokrshop item by id.
+/// ```ts
+/// import { invoke } from "@tauri-apps/api";
+/// 
+/// await invoke("get-workshop-item", 1337);
+/// ```
 #[tauri::command]
 async fn get_workshop_item<R: Runtime>(
     app: tauri::AppHandle<R>,
