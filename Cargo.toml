@@ -5,7 +5,7 @@ authors = [ "You" ]
 description = ""
 edition = "2021"
 rust-version = "1.60"
-exclude = ["/examples"]
+exclude = ["/examples", ".github/", ".vscode/"]
 
 [dependencies]
 log = "0.4.21"
