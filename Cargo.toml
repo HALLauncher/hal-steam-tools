@@ -6,6 +6,7 @@ description = "Tauri plugin for steamworks that used in HAL"
 edition = "2021"
 rust-version = "1.60"
 exclude = ["/examples", ".github/", ".vscode/"]
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 log = "0.4.21"
