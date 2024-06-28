@@ -1,6 +1,6 @@
 [package]
 name = "tauri-plugin-hal-steamworks"
-version = "0.0.0"
+version = "0.0.2"
 authors = [ "voidptr_t" ]
 description = "Tauri plugin for steamworks that used in HAL"
 edition = "2021"
