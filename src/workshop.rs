@@ -1,7 +1,7 @@
-use std::sync::{Arc, Condvar, Mutex};
+use std::{path::PathBuf, sync::{Arc, Condvar, Mutex}};
 
 use log::error;
-use steamworks::PublishedFileId;
+use steamworks::{ItemState, PublishedFileId};
 use tauri::{Event, Manager, Runtime};
 
 use crate::SteamWorks;
@@ -15,13 +15,18 @@ pub struct WokrshopItem {
     pub preview: Option<String>,
 }
 
+pub struct LocalWorkshopItem {
+    pub id: u64,
+    pub path: std::path::PathBuf,
+    pub size_on_disk: u64,
+}
 
 /// Tauri event to request a wokrshop item.
 /// ```ts
 /// import { emit, listen } from "@tauri-apps/api/event";
-/// 
+///
 /// emit("need-wokrshop-item", 1337);
-/// 
+///
 /// listen<any>("got-wokrshop-item", async (event) => {
 ///     console.log(event.payload);
 /// });
@@ -83,7 +88,7 @@ pub(crate) fn need_workshop_item<R: Runtime>(handle: tauri::AppHandle<R>, event:
 /// Get a wokrshop item by id.
 /// ```ts
 /// import { invoke } from "@tauri-apps/api";
-/// 
+///
 /// await invoke("get-workshop-item", 1337);
 /// ```
 #[tauri::command]
@@ -92,7 +97,10 @@ pub(crate) async fn get_workshop_item<R: Runtime>(
     id: u64,
 ) -> Result<WokrshopItem, String> {
     let state = app.state::<SteamWorks>();
-    let condvar = Arc::new((Mutex::<Option<Result<WokrshopItem, String>>>::new(None), Condvar::new()));
+    let condvar = Arc::new((
+        Mutex::<Option<Result<WokrshopItem, String>>>::new(None),
+        Condvar::new(),
+    ));
 
     let result = if let Ok(client) = state.client.lock() {
         let condvar = condvar.clone();
@@ -141,4 +149,44 @@ pub(crate) async fn get_workshop_item<R: Runtime>(
 
     let result = lock.clone();
     result.unwrap()
+}
+
+/// Get all wokrshop items that are subscribed and installed. <br>
+/// ***Returns A vector of LocalWorkshopItem that can be empty.***
+pub async fn get_subscribed_workshop_items(app: tauri::AppHandle) -> Vec<LocalWorkshopItem> {
+    let state = app.state::<SteamWorks>();
+    let mut local_items = Vec::new();
+
+    let Ok(client) = state.client.lock() else {
+        panic!("client is null");
+    };
+
+    let subscribed_items = client.ugc().subscribed_items();
+
+    for item in subscribed_items {
+        let state = client.ugc().item_state(item.clone());
+
+        if state.contains(ItemState::INSTALLED) {
+            local_items.push(item);
+        }
+    }
+
+    let local_items = local_items
+        .iter()
+        .map(|x| {
+            let install_info = client.ugc().item_install_info(x.clone()).unwrap();
+            (x.clone(), install_info)
+        })
+        .collect::<Vec<_>>();
+
+    local_items
+        .iter()
+        .map(|(item, info)| {
+            LocalWorkshopItem {
+                id: item.0,
+                path: PathBuf::from(info.folder.clone()),
+                size_on_disk: info.size_on_disk,
+            }
+        })
+        .collect::<Vec<_>>()
 }
