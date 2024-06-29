@@ -28,13 +28,10 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
 
             Ok(())
         })
-        .on_event(|app, e| match e {
-            tauri::RunEvent::MainEventsCleared => {
-                if let Ok(sc) = app.state::<SteamWorks>().single_client.lock() {
-                    sc.run_callbacks();
-                }
+        .on_event(|app, e| if let tauri::RunEvent::MainEventsCleared = e {
+            if let Ok(sc) = app.state::<SteamWorks>().single_client.lock() {
+                sc.run_callbacks();
             }
-            _ => {}
         })
         .invoke_handler(tauri::generate_handler![workshop::get_workshop_item])
         .build()

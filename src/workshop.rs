@@ -164,7 +164,7 @@ pub async fn get_subscribed_workshop_items(app: tauri::AppHandle) -> Vec<LocalWo
     let subscribed_items = client.ugc().subscribed_items();
 
     for item in subscribed_items {
-        let state = client.ugc().item_state(item.clone());
+        let state = client.ugc().item_state(item);
 
         if state.contains(ItemState::INSTALLED) {
             local_items.push(item);
@@ -174,8 +174,8 @@ pub async fn get_subscribed_workshop_items(app: tauri::AppHandle) -> Vec<LocalWo
     let local_items = local_items
         .iter()
         .map(|x| {
-            let install_info = client.ugc().item_install_info(x.clone()).unwrap();
-            (x.clone(), install_info)
+            let install_info = client.ugc().item_install_info(*x).unwrap();
+            (*x, install_info)
         })
         .collect::<Vec<_>>();
 

@@ -6,10 +6,8 @@ pub async fn get_mods_folder(app: tauri::AppHandle) -> Result<PathBuf, String> {
     };
 
     let launcher_mods_dir = data_dir.join("mods");
-    if !launcher_mods_dir.exists() {
-        if std::fs::create_dir_all(&launcher_mods_dir).is_err() {
-            return Err("Could not create mods directory".to_string());
-        }
+    if !launcher_mods_dir.exists() && std::fs::create_dir_all(&launcher_mods_dir).is_err() {
+        return Err("Could not create mods directory".to_string());
     }
 
     Ok(launcher_mods_dir)
