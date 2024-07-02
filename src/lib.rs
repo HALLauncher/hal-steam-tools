@@ -1,10 +1,14 @@
-
 use tauri::{
     plugin::{Builder, TauriPlugin}, Manager, Runtime,
 };
 
+#[macro_use]
+extern crate log;
+
 pub mod workshop;
 pub mod filesystem;
+
+/// The plugin state.
 pub struct SteamWorks {
     pub client: std::sync::Mutex<steamworks::Client>,
     pub single_client: std::sync::Mutex<steamworks::SingleClient>,
@@ -30,6 +34,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
         })
         .on_event(|app, e| if let tauri::RunEvent::MainEventsCleared = e {
             if let Ok(sc) = app.state::<SteamWorks>().single_client.lock() {
+                trace!("running callbacks");
                 sc.run_callbacks();
             }
         })
